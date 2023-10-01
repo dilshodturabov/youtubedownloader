@@ -7,7 +7,7 @@ app.get('/',(req, res)=>{
     res.send('Hello world this is backend site of my telegram bot if you want to see my bot visit this url: https://t.me/dilshodturabovbot');
 });
 
-const port = 3000;
+const port = 2003;
 app.listen(port,()=>{
   console.log(`Server is running localhost:${port}`);
 });
@@ -20,7 +20,6 @@ bot.start((ctx) => {
 });
 
 bot.on('message', async (ctx) => {
-    ctx.reply('Fetching data... 🎬');
     let url = ctx.message.text;
     if(ytdl.validateURL(url)) {
         let info = await ytdl.getInfo(url);
