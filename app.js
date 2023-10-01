@@ -1,6 +1,14 @@
 const fs = require('fs');
 const { Telegraf } = require('telegraf');
 const ytdl = require('ytdl-core-discord');
+const express = require('express');
+const app = express();
+
+const port = 2003;
+
+app.listen(port,()=>{
+    console.log(`Server is running on port ${port}`);
+});
 
 const bot = new Telegraf('5019891372:AAFr7v9R50XDTD6pArcbZqcPx9JaYOFEVvk');
 const chatData = new Map();
@@ -10,6 +18,7 @@ bot.start((ctx) => {
 });
 
 bot.on('message', async (ctx) => {
+    ctx.reply('Downloading... 📥')
     let url = ctx.message.text;
     if(ytdl.validateURL(url)) {
         let info = await ytdl.getInfo(url);
@@ -25,7 +34,7 @@ bot.on('message', async (ctx) => {
 bot.on('callback_query', (ctx) => {
     let i = parseInt(ctx.callbackQuery.data);
     let { info, formats } = chatData.get(ctx.chat.id);
-    ctx.reply('Downloading...');
+    ctx.reply('Downloading... 📥');
     ytdl.downloadFromInfo(info, { quality: formats[i].itag })
         .pipe(fs.createWriteStream('video.mp4'))
         .on('finish', () => {
