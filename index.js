@@ -4,7 +4,7 @@ const express = require('express');
 const app = express();
 
 app.get('/',(req, res)=>{
-    res.send('Hello world');
+    res.send('Hello world this is backend site of my telegram bot if you want to see my bot visit this url: https://t.me/dilshodturabovbot');
 });
 
 const port = 3000;
@@ -20,7 +20,7 @@ bot.start((ctx) => {
 });
 
 bot.on('message', async (ctx) => {
-    ctx.reply('Downloading...')
+    ctx.reply('Fetching data...');
     let url = ctx.message.text;
     if(ytdl.validateURL(url)) {
         let info = await ytdl.getInfo(url);
@@ -36,8 +36,7 @@ bot.on('message', async (ctx) => {
 bot.on('callback_query', (ctx) => {
     let i = parseInt(ctx.callbackQuery.data);
     let { info, formats } = chatData.get(ctx.chat.id);
-    ctx.reply('Downloading...');
-    const streamOptions = { seek: 0, volume: 1 };
+    ctx.reply('Downloading...📥');
     const stream = ytdl.downloadFromInfo(info, { quality: formats[i].itag });
     ctx.replyWithVideo({ source: stream });
 });
