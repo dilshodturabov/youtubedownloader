@@ -1,28 +1,26 @@
-const fs = require('fs');
 const { Telegraf } = require('telegraf');
 const ytdl = require('ytdl-core-discord');
 const express = require('express');
 const app = express();
 
-const port = 2003;
-
-app.get('/',(res, req)=>{
-    res.send('hello world');
+app.get('/',(req, res)=>{
+    res.send('Hello world');
 });
 
+const port = 3000;
 app.listen(port,()=>{
-    console.log(`Server is running on port ${port}`);
+  console.log(`Server is running localhost:${port}`);
 });
 
 const bot = new Telegraf('5019891372:AAFr7v9R50XDTD6pArcbZqcPx9JaYOFEVvk');
 const chatData = new Map();
 
 bot.start((ctx) => {
-    ctx.reply('Hello there! Welcome to my new telegram bot.');
+    ctx.reply('Hello there! Welcome to my telegram bot.');
 });
 
 bot.on('message', async (ctx) => {
-    ctx.reply('Downloading... 📥')
+    ctx.reply('Downloading...')
     let url = ctx.message.text;
     if(ytdl.validateURL(url)) {
         let info = await ytdl.getInfo(url);
@@ -38,12 +36,11 @@ bot.on('message', async (ctx) => {
 bot.on('callback_query', (ctx) => {
     let i = parseInt(ctx.callbackQuery.data);
     let { info, formats } = chatData.get(ctx.chat.id);
-    ctx.reply('Downloading... 📥');
-    ytdl.downloadFromInfo(info, { quality: formats[i].itag })
-        .pipe(fs.createWriteStream('video.mp4'))
-        .on('finish', () => {
-            ctx.replyWithVideo({ source: fs.createReadStream('video.mp4') });
-        });
+    ctx.reply('Downloading...');
+    const streamOptions = { seek: 0, volume: 1 };
+    const stream = ytdl.downloadFromInfo(info, { quality: formats[i].itag });
+    ctx.replyWithVideo({ source: stream });
 });
 
+console.log('now bot is working...')
 bot.launch();
