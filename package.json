@@ -2,12 +2,12 @@
   "name": "ydbdt",
   "version": "1.0.0",
   "description": "this project is for downloading youtube videos from telegram",
-  "main": "index.js",
+  "main": "app.js",
   "engines": {
     "node": "18.17.0"
   },
   "scripts": {
-    "start": "node index.js",
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
