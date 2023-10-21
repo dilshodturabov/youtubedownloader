@@ -23,23 +23,38 @@ bot.on('message', async (ctx) => {
     let url = ctx.message.text;
     if(ytdl.validateURL(url)) {
         let info = await ytdl.getInfo(url);
-        let formats = ytdl.filterFormats(info.formats, 'videoandaudio');
-        chatData.set(ctx.chat.id, { info, formats });
-        let inlineKeyboard = formats.map((format, i) => [{ text: format.qualityLabel, callback_data: String(i) }]);
-        ctx.reply('Please choose a video quality: 🖼️', { reply_markup: { inline_keyboard: inlineKeyboard } });
+        let videoFormats = ytdl.filterFormats(info.formats, 'videoandaudio');
+        let audioFormats = ytdl.filterFormats(info.formats, 'audioonly');
+        chatData.set(ctx.chat.id, { info, videoFormats, audioFormats });
+        let videoInlineKeyboard = videoFormats.map((format, i) => [{ text: format.qualityLabel, callback_data: 'v' + String(i) }]);
+        let audioInlineKeyboard = audioFormats.map((format, i) => [{ text: format.audioBitrate + 'kbps', callback_data: 'a' + String(i) }]);
+        // Store the message returned by ctx.reply
+        let chooseQualityMessage = await ctx.reply('Please choose a video or audio quality:', { reply_markup: { inline_keyboard: [...videoInlineKeyboard, ...audioInlineKeyboard] } });
+        chatData.set(ctx.chat.id, { ...chatData.get(ctx.chat.id), chooseQualityMessage });
     } else {
         ctx.reply('Please provide a valid YouTube URL. 🔗');
     }
 });
 
-bot.on('callback_query', (ctx) => {
-    let i = parseInt(ctx.callbackQuery.data);
-    let { info, formats } = chatData.get(ctx.chat.id);
-    ctx.reply('Downloading...📥');
+bot.on('callback_query', async (ctx) => {
+    let type = ctx.callbackQuery.data.charAt(0);
+    let i = parseInt(ctx.callbackQuery.data.substr(1));
+    let { info, videoFormats, audioFormats, chooseQualityMessage } = chatData.get(ctx.chat.id);
+    // Store the message returned by ctx.reply
+    let downloadingMessage = await ctx.reply('Downloading...📥');
     const streamOptions = { seek: 0, volume: 1 };
-    const stream = ytdl.downloadFromInfo(info, { quality: formats[i].itag });
-    ctx.replyWithVideo({ source: stream });
+    const stream = ytdl.downloadFromInfo(info, { quality: (type === 'v' ? videoFormats[i] : audioFormats[i]).itag });
+    if(type === 'v') {
+        await ctx.replyWithVideo({ source: stream });
+    } else {
+        await ctx.replyWithAudio({ source: stream });
+    }
+    // Remove the 'Downloading...📥' message
+    await ctx.telegram.deleteMessage(ctx.chat.id, downloadingMessage.message_id);
+    // Remove the 'Please choose a video or audio quality:' message
+    await ctx.telegram.deleteMessage(ctx.chat.id, chooseQualityMessage.message_id);
 });
+
 
 console.log('now bot is working...')
 bot.launch();
