@@ -1,7 +1,7 @@
 require('dotenv').config();
 const { Telegraf } = require('telegraf');
 const ytdl = require('ytdl-core-discord');
-cosnt http = require('http');
+const http = require('http');
 http.createServer((req, res) => {
     res.write('alive');
     res.end();
