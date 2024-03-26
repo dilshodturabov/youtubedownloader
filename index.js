@@ -1,6 +1,12 @@
 require('dotenv').config();
 const { Telegraf } = require('telegraf');
 const ytdl = require('ytdl-core-discord');
+cosnt http = require('http');
+http.createServer((req, res) => {
+    res.write('alive');
+    res.end();
+}).listen(2003);
+
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 const chatData = new Map();
